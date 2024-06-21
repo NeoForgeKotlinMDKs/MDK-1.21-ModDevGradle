@@ -4,6 +4,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '0.1.99'
+    id "org.jetbrains.kotlin.jvm" version ("2.0.0")
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -20,6 +21,10 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    maven {
+        name = "Kotlin for Forge"
+        setUrl("https://thedarkcolour.github.io/KotlinForForge/")
+    }
 }
 
 base {
@@ -114,6 +119,9 @@ configurations {
 }
 
 dependencies {
+    // Since Kotlin is its own JVM language with its own standard library, a custom language loader needs to be used, i.e. KFF
+    implementation("thedarkcolour:kotlinforforge-neoforge:$kff_version")
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
@@ -147,6 +155,8 @@ tasks.withType(ProcessResources).configureEach {
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
             neo_version_range      : neo_version_range,
+            kff_version            : kff_version,
+            kff_version_range      : kff_version_range,
             loader_version_range   : loader_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
@@ -157,7 +167,7 @@ tasks.withType(ProcessResources).configureEach {
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/neoforge.mods.toml']) {
+    filesMatching(['META-INF/neoforge.mods.toml', "*.mixins.json"]) {
         expand replaceProperties
     }
 }
